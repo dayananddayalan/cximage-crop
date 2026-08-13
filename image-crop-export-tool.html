@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Crop & Export Tool</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#f3f4f6;color:#111;min-height:100vh;padding:24px}
+  .wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  h1{font-size:20px;font-weight:700;color:#111;display:flex;align-items:center;gap:8px}
+
+  /* drop zone */
+  #drop-zone{border:2px dashed #d1d5db;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;height:190px;cursor:pointer;background:#fff;transition:all .15s}
+  #drop-zone:hover,#drop-zone.over{background:#eff6ff;border-color:#3b82f6}
+  #drop-zone i{font-size:36px;color:#9ca3af}
+  #drop-zone p{font-size:15px;color:#6b7280}
+  #drop-zone small{font-size:12px;color:#9ca3af}
+
+  /* shared */
+  .panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px}
+  .panel-title{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+  .row-apart{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .ghost-btn{padding:6px 14px;font-size:13px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;color:#6b7280;cursor:pointer}
+  .ghost-btn:hover{background:#f9fafb}
+  .primary-btn{padding:8px 20px;font-size:13px;font-weight:600;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer}
+  .primary-btn:hover{background:#1d4ed8}
+  .primary-btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* step 1 */
+  #editor{display:none;flex-direction:column;gap:12px}
+  .step-title{font-size:13px;font-weight:700;color:#374151}
+  .ratio-btns{display:flex;gap:6px;flex-wrap:wrap}
+  .rb{padding:5px 13px;font-size:12px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;color:#6b7280;cursor:pointer}
+  .rb:hover{background:#f3f4f6}
+  .rb.active{background:#eff6ff;border-color:#3b82f6;color:#2563eb;font-weight:600}
+  .size-fields{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .size-fields label{font-size:13px;color:#6b7280;font-weight:500}
+  .sinp{width:80px;font-size:15px;padding:7px 8px;border-radius:8px;border:1.5px solid #d1d5db;background:#fff;color:#111;text-align:center;font-weight:700}
+  .sinp:focus{outline:none;border-color:#3b82f6}
+  .lock-btn{width:32px;height:32px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .lock-btn.on{background:#eff6ff;border-color:#3b82f6;color:#2563eb}
+  .set-btn{padding:8px 18px;font-size:13px;font-weight:600;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer}
+  .set-btn:hover{background:#1d4ed8}
+  .chips{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .chip{font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px}
+  .chip-1x{background:#eff6ff;color:#2563eb}
+  .chip-2x{background:#f9fafb;border:1px solid #e5e7eb;color:#6b7280}
+  #size-note{font-size:12px;color:#6b7280}
+  .toolbar{display:flex;gap:6px;flex-wrap:wrap}
+  .tb{display:flex;align-items:center;gap:5px;padding:6px 12px;font-size:13px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;color:#374151}
+  .tb:hover{background:#f9fafb}
+  .sep{width:1px;height:28px;background:#e5e7eb;align-self:center}
+  #crop-area{background:#111;border-radius:12px;overflow:hidden}
+  #crop-img{display:block;max-width:100%;max-height:420px}
+
+  /* step 2 */
+  #step2{display:none;flex-direction:column;gap:14px}
+  .info-bar{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:680px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
+  .vcard{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .vcard-top{position:relative;background:#f9fafb;display:flex;align-items:center;justify-content:center;height:110px;overflow:hidden;flex-shrink:0}
+  .vcard-top img{max-width:100%;max-height:110px;object-fit:contain;display:block}
+  .badges{position:absolute;top:6px;left:6px;display:flex;gap:3px}
+  .badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;color:#fff}
+  .b-1x{background:rgba(0,0,0,.6)}
+  .b-2x{background:#3730a3cc}
+  .b-jpeg{background:#ea580cee}
+  .b-webp{background:#6366f1ee}
+  .b-png{background:#16a34aee}
+  .b-avif{background:#a855f7ee}
+  .vcard-body{padding:10px 10px 6px;display:flex;flex-direction:column;gap:5px;flex:1}
+  .vc-title{font-size:12px;font-weight:700;color:#111}
+  .vc-dim{font-size:11px;font-weight:700;color:#2563eb;background:#eff6ff;display:inline-block;padding:2px 7px;border-radius:4px;width:fit-content}
+  .field-label{font-size:10px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:4px;margin-bottom:2px}
+  .q-row{display:flex;align-items:center;gap:6px}
+  .q-row input[type=range]{flex:1;accent-color:#2563eb;cursor:pointer}
+  .q-row span{font-size:11px;min-width:36px;text-align:right;color:#6b7280}
+  .file-size{font-size:10px;color:#9ca3af}
+  .dl-btn{margin:6px 8px 8px;padding:9px;font-size:12px;font-weight:700;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;width:calc(100% - 16px);transition:background .15s}
+  .dl-btn:hover{background:#1d4ed8}
+  .dl-btn:active{background:#1e40af;transform:scale(.98)}
+  .bottom-bar{display:flex;gap:8px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><i class="ti ti-crop"></i> Image Crop &amp; Export Tool</h1>
+
+  <!-- Drop zone -->
+  <div id="drop-zone" onclick="document.getElementById('fin').click()">
+    <i class="ti ti-photo-up"></i>
+    <p>Drop an image or click to upload</p>
+    <small>PNG · JPEG · WebP · GIF · AVIF</small>
+    <input type="file" id="fin" accept="image/*" style="display:none">
+  </div>
+
+  <!-- STEP 1 -->
+  <div id="editor">
+    <div class="row-apart">
+      <span class="step-title">Step 1 — Set size &amp; crop</span>
+      <button class="ghost-btn" id="new1"><i class="ti ti-refresh"></i> New image</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Ratio</div>
+      <div class="ratio-btns">
+        <button class="rb active" data-w="0" data-h="0">Free</button>
+        <button class="rb" data-w="1" data-h="1">1:1</button>
+        <button class="rb" data-w="4" data-h="3">4:3</button>
+        <button class="rb" data-w="3" data-h="4">3:4</button>
+        <button class="rb" data-w="16" data-h="9">16:9</button>
+        <button class="rb" data-w="9" data-h="16">9:16</button>
+        <button class="rb" data-w="3" data-h="2">3:2</button>
+        <button class="rb" data-w="2" data-h="3">2:3</button>
+        <button class="rb" data-w="5" data-h="4">5:4</button>
+        <button class="rb" data-w="21" data-h="9">21:9</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">1x output size — type → Set &amp; lock → position crop → Export</div>
+      <div class="size-fields">
+        <label>W</label>
+        <input class="sinp" id="cw" type="number" min="1" max="9999" placeholder="500">
+        <span style="font-size:15px;color:#9ca3af">×</span>
+        <label>H</label>
+        <input class="sinp" id="ch" type="number" min="1" max="9999" placeholder="500">
+        <span style="font-size:12px;color:#9ca3af">px</span>
+        <button class="lock-btn on" id="sz-lock" title="Lock aspect ratio">🔒</button>
+        <button class="set-btn" id="set-size-btn">Set &amp; lock crop</button>
+      </div>
+      <div class="chips">
+        <span class="chip chip-1x" id="chip-1x-s1">1x: —</span>
+        <span style="font-size:12px;color:#9ca3af">→ doubles →</span>
+        <span class="chip chip-2x" id="chip-2x-s1">2x: —</span>
+        <span id="size-note"></span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="tb" id="zin"><i class="ti ti-zoom-in"></i> Zoom in</button>
+      <button class="tb" id="zout"><i class="ti ti-zoom-out"></i> Zoom out</button>
+      <div class="sep"></div>
+      <button class="tb" id="rotl"><i class="ti ti-rotate-left"></i> Rotate L</button>
+      <button class="tb" id="rotr"><i class="ti ti-rotate-right"></i> Rotate R</button>
+      <button class="tb" id="flipx"><i class="ti ti-flip-horizontal"></i> Flip</button>
+      <button class="tb" id="rst"><i class="ti ti-aspect-ratio"></i> Reset</button>
+    </div>
+
+    <div id="crop-area"><img id="crop-img" alt=""></div>
+
+    <div class="row-apart" style="margin-top:4px">
+      <span id="sel-dim" style="font-size:12px;color:#9ca3af"></span>
+      <button class="primary-btn" id="proceed-btn">Export →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="step2">
+    <div class="row-apart">
+      <span class="step-title">Step 2 — Quality &amp; Export</span>
+      <div style="display:flex;gap:8px">
+        <button class="ghost-btn" id="back2">← Back to crop</button>
+        <button class="ghost-btn" id="new2"><i class="ti ti-refresh"></i> New image</button>
+      </div>
+    </div>
+    <div class="info-bar">
+      <span style="font-size:13px;color:#6b7280;font-weight:500">Exporting at:</span>
+      <span class="chip chip-1x" id="chip-1x-s2">1x: —</span>
+      <span class="chip chip-2x" id="chip-2x-s2">2x: —</span>
+    </div>
+    <div class="cards-grid" id="cards"></div>
+    <div class="bottom-bar">
+      <button class="primary-btn" id="export-all"><i class="ti ti-download"></i> Download all 8</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script>
+  const dropZone = document.getElementById('drop-zone');
+  const fin = document.getElementById('fin');
+  const editorEl = document.getElementById('editor');
+  const step2El = document.getElementById('step2');
+  const cropImgEl = document.getElementById('crop-img');
+  const selDimEl = document.getElementById('sel-dim');
+  const cwInp = document.getElementById('cw');
+  const chInp = document.getElementById('ch');
+  const szLockBtn = document.getElementById('sz-lock');
+  const sizeNote = document.getElementById('size-note');
+  let szLocked = true, cropper = null, out1x = { w: 0, h: 0 }, sourceCropCanvas = null;
+
+  // AVIF support check
+  const avifSupported = (() => {
+    const c = document.createElement('canvas');
+    c.width = 1; c.height = 1;
+    return c.toDataURL('image/avif').startsWith('data:image/avif');
+  })();
+
+  const variants = [
+    { id: '1x-jpeg', scale: '1x', fmt: 'jpeg', label: '1x JPEG', ext: 'jpg' },
+    { id: '2x-jpeg', scale: '2x', fmt: 'jpeg', label: '2x JPEG', ext: 'jpg' },
+    { id: '1x-webp', scale: '1x', fmt: 'webp', label: '1x WebP', ext: 'webp' },
+    { id: '2x-webp', scale: '2x', fmt: 'webp', label: '2x WebP', ext: 'webp' },
+    { id: '1x-png',  scale: '1x', fmt: 'png',  label: '1x PNG',  ext: 'png'  },
+    { id: '2x-png',  scale: '2x', fmt: 'png',  label: '2x PNG',  ext: 'png'  },
+    { id: '1x-avif', scale: '1x', fmt: 'avif', label: '1x AVIF', ext: 'avif' },
+    { id: '2x-avif', scale: '2x', fmt: 'avif', label: '2x AVIF', ext: 'avif' },
+  ];
+
+  function getMime(fmt) {
+    if (fmt === 'jpeg') return 'image/jpeg';
+    if (fmt === 'webp') return 'image/webp';
+    if (fmt === 'avif') return avifSupported ? 'image/avif' : 'image/png';
+    return 'image/png';
+  }
+  function isLossless(fmt) { return fmt === 'png' || (fmt === 'avif' && !avifSupported); }
+  function getQ(vid) { const el = document.getElementById('q-' + vid); return el ? parseInt(el.value) : 85; }
+  function outSize(scale) { return scale === '1x' ? { w: out1x.w, h: out1x.h } : { w: out1x.w * 2, h: out1x.h * 2 }; }
+
+  function updateChips(w, h) {
+    document.getElementById('chip-1x-s1').textContent = `1x: ${w} × ${h} px`;
+    document.getElementById('chip-2x-s1').textContent = `2x: ${w * 2} × ${h * 2} px`;
+    document.getElementById('chip-1x-s2').textContent = `1x: ${w} × ${h} px`;
+    document.getElementById('chip-2x-s2').textContent = `2x: ${w * 2} × ${h * 2} px`;
+  }
+
+  function buildCanvas(vid) {
+    const v = variants.find(x => x.id === vid);
+    const { w, h } = outSize(v.scale);
+    const q = getQ(vid);
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(sourceCropCanvas, 0, 0, w, h);
+    const ll = isLossless(v.fmt);
+    const dataUrl = c.toDataURL(getMime(v.fmt), ll ? undefined : q / 100);
+    return { dataUrl, w, h, v };
+  }
+
+  function renderCard(vid) {
+    const { dataUrl, w, h } = buildCanvas(vid);
+    const img = document.getElementById('img-' + vid); if (img) img.src = dataUrl;
+    const dim = document.getElementById('dim-' + vid); if (dim) dim.textContent = `${w} × ${h} px`;
+    const bytes = Math.round((dataUrl.length - 22) * 0.75);
+    const sz = document.getElementById('sz-' + vid);
+    if (sz) sz.textContent = bytes > 1048576 ? (bytes / 1048576).toFixed(2) + ' MB' : (bytes / 1024).toFixed(0) + ' KB';
+  }
+
+  // Direct download — works on any real hosted page
+  function doDownload(vid) {
+    const { dataUrl, v } = buildCanvas(vid);
+    const fname = `${v.label.replace(' ', '-')}.${v.ext}`;
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function resetApp() {
+    if (cropper) { cropper.destroy(); cropper = null; }
+    sourceCropCanvas = null;
+    editorEl.style.display = 'none';
+    step2El.style.display = 'none';
+    dropZone.style.display = 'flex';
+    cropImgEl.src = '';
+    out1x = { w: 0, h: 0 };
+    cwInp.value = ''; chInp.value = '';
+    sizeNote.textContent = '';
+  }
+
+  function loadFile(file) {
+    const url = URL.createObjectURL(file);
+    if (cropper) { cropper.destroy(); cropper = null; }
+    cropImgEl.src = url;
+    cropImgEl.onload = () => {
+      dropZone.style.display = 'none';
+      step2El.style.display = 'none';
+      editorEl.style.display = 'flex';
+      document.querySelectorAll('.rb').forEach(b => b.classList.remove('active'));
+      document.querySelector('.rb[data-w="0"]').classList.add('active');
+      cwInp.value = ''; chInp.value = '';
+      sizeNote.textContent = ''; out1x = { w: 0, h: 0 };
+      cropper = new Cropper(cropImgEl, {
+        viewMode: 1, autoCropArea: 0.85,
+        crop(e) {
+          const d = e.detail;
+          const w = Math.round(d.width), h = Math.round(d.height);
+          selDimEl.textContent = `Selection: ${w} × ${h} px  ·  2x: ${w * 2} × ${h * 2} px`;
+          if (!out1x.w) { cwInp.value = w; chInp.value = h; }
+        }
+      });
+    };
+  }
+
+  // Ratio buttons
+  document.querySelectorAll('.rb').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.rb').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      const w = +b.dataset.w, h = +b.dataset.h;
+      if (cropper) cropper.setAspectRatio(w === 0 ? NaN : w / h);
+    });
+  });
+
+  // Lock toggle
+  szLockBtn.addEventListener('click', () => {
+    szLocked = !szLocked;
+    szLockBtn.classList.toggle('on', szLocked);
+    szLockBtn.textContent = szLocked ? '🔒' : '🔓';
+  });
+
+  cwInp.addEventListener('input', () => {
+    if (!szLocked || !cropper || !cwInp.value) return;
+    const d = cropper.getData();
+    if (d.width > 0) chInp.value = Math.round(parseInt(cwInp.value) * (d.height / d.width));
+  });
+  chInp.addEventListener('input', () => {
+    if (!szLocked || !cropper || !chInp.value) return;
+    const d = cropper.getData();
+    if (d.height > 0) cwInp.value = Math.round(parseInt(chInp.value) * (d.width / d.height));
+  });
+
+  document.getElementById('set-size-btn').addEventListener('click', () => {
+    const w = Math.max(1, parseInt(cwInp.value) || 0);
+    const h = Math.max(1, parseInt(chInp.value) || 0);
+    if (!w || !h) { sizeNote.textContent = '⚠ Enter both W and H first'; return; }
+    if (!cropper) { sizeNote.textContent = '⚠ Load an image first'; return; }
+    out1x = { w, h };
+    cwInp.value = w; chInp.value = h;
+    cropper.setAspectRatio(w / h);
+    document.querySelectorAll('.rb').forEach(b => b.classList.remove('active'));
+    updateChips(w, h);
+    sizeNote.textContent = `✓ Locked to ${w} × ${h} — position crop then click Export`;
+  });
+
+  document.getElementById('zin').addEventListener('click', () => cropper && cropper.zoom(0.1));
+  document.getElementById('zout').addEventListener('click', () => cropper && cropper.zoom(-0.1));
+  document.getElementById('rotl').addEventListener('click', () => cropper && cropper.rotate(-90));
+  document.getElementById('rotr').addEventListener('click', () => cropper && cropper.rotate(90));
+  document.getElementById('flipx').addEventListener('click', () => {
+    if (!cropper) return;
+    const d = cropper.getData();
+    cropper.scaleX(d.scaleX === -1 ? 1 : -1);
+  });
+  document.getElementById('rst').addEventListener('click', () => {
+    if (cropper) { cropper.reset(); out1x = { w: 0, h: 0 }; sizeNote.textContent = ''; }
+  });
+  document.getElementById('new1').addEventListener('click', resetApp);
+  document.getElementById('new2').addEventListener('click', resetApp);
+  document.getElementById('back2').addEventListener('click', () => {
+    step2El.style.display = 'none';
+    editorEl.style.display = 'flex';
+  });
+
+  document.getElementById('proceed-btn').addEventListener('click', () => {
+    if (!cropper) return;
+    if (!out1x.w || !out1x.h) {
+      const d = cropper.getData();
+      out1x = { w: Math.round(d.width), h: Math.round(d.height) };
+      updateChips(out1x.w, out1x.h);
+    }
+    sourceCropCanvas = cropper.getCroppedCanvas({ imageSmoothingQuality: 'high' });
+    editorEl.style.display = 'none';
+    step2El.style.display = 'flex';
+    buildCards();
+  });
+
+  function buildCards() {
+    const grid = document.getElementById('cards');
+    grid.innerHTML = '';
+    variants.forEach(v => {
+      const ll = isLossless(v.fmt);
+      const { w, h } = outSize(v.scale);
+      const card = document.createElement('div');
+      card.className = 'vcard';
+      card.innerHTML = `
+        <div class="vcard-top">
+          <img id="img-${v.id}" src="" alt="${v.label}">
+          <div class="badges">
+            <span class="badge b-${v.scale}">${v.scale.toUpperCase()}</span>
+            <span class="badge b-${v.fmt}">${v.fmt.toUpperCase()}</span>
+          </div>
+        </div>
+        <div class="vcard-body">
+          <div class="vc-title">${v.label}</div>
+          <div class="vc-dim" id="dim-${v.id}">${w} × ${h} px</div>
+          <div class="field-label">Quality</div>
+          <div class="q-row">
+            <input type="range" id="q-${v.id}" min="10" max="100" value="${ll ? 100 : 85}" step="1"
+              ${ll ? 'disabled' : ''} style="${ll ? 'opacity:.35' : ''}">
+            <span id="qv-${v.id}">${ll ? 'Lossless' : '85%'}</span>
+          </div>
+          <div class="file-size" id="sz-${v.id}">—</div>
+        </div>
+        <button class="dl-btn" id="dl-${v.id}">
+          <i class="ti ti-download"></i> Download
+        </button>`;
+      grid.appendChild(card);
+
+      if (!ll) {
+        document.getElementById('q-' + v.id).addEventListener('input', () => {
+          document.getElementById('qv-' + v.id).textContent = getQ(v.id) + '%';
+          renderCard(v.id);
+        });
+      }
+
+      document.getElementById('dl-' + v.id).addEventListener('click', () => doDownload(v.id));
+      renderCard(v.id);
+    });
+  }
+
+  // Bulk download — sequential with delay
+  document.getElementById('export-all').addEventListener('click', function () {
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader"></i> Downloading…';
+    let i = 0;
+    function next() {
+      if (i >= variants.length) {
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="ti ti-download"></i> Download all 8';
+        }, 400);
+        return;
+      }
+      doDownload(variants[i].id);
+      i++;
+      setTimeout(next, 700);
+    }
+    next();
+  });
+
+  // File input
+  fin.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('over');
+    if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  });
+</script>
+</body>
+</html>
