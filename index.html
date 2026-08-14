@@ -11,25 +11,19 @@
   body{font-family:system-ui,-apple-system,sans-serif;background:#f3f4f6;color:#111;min-height:100vh;padding:24px}
   .wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
   h1{font-size:20px;font-weight:700;color:#111;display:flex;align-items:center;gap:8px}
-
-  /* drop zone */
   #drop-zone{border:2px dashed #d1d5db;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;height:190px;cursor:pointer;background:#fff;transition:all .15s}
   #drop-zone:hover,#drop-zone.over{background:#eff6ff;border-color:#3b82f6}
   #drop-zone i{font-size:36px;color:#9ca3af}
   #drop-zone p{font-size:15px;color:#6b7280}
   #drop-zone small{font-size:12px;color:#9ca3af}
-
-  /* shared */
   .panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px}
   .panel-title{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
   .row-apart{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
   .ghost-btn{padding:6px 14px;font-size:13px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;color:#6b7280;cursor:pointer}
   .ghost-btn:hover{background:#f9fafb}
-  .primary-btn{padding:8px 20px;font-size:13px;font-weight:600;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer}
+  .primary-btn{padding:8px 20px;font-size:13px;font-weight:600;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
   .primary-btn:hover{background:#1d4ed8}
   .primary-btn:disabled{opacity:.5;cursor:not-allowed}
-
-  /* step 1 */
   #editor{display:none;flex-direction:column;gap:12px}
   .step-title{font-size:13px;font-weight:700;color:#374151}
   .ratio-btns{display:flex;gap:6px;flex-wrap:wrap}
@@ -41,7 +35,7 @@
   .sinp{width:80px;font-size:15px;padding:7px 8px;border-radius:8px;border:1.5px solid #d1d5db;background:#fff;color:#111;text-align:center;font-weight:700}
   .sinp:focus{outline:none;border-color:#3b82f6}
   .lock-btn{width:32px;height:32px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
-  .lock-btn.on{background:#eff6ff;border-color:#3b82f6;color:#2563eb}
+  .lock-btn.on{background:#eff6ff;border-color:#3b82f6}
   .set-btn{padding:8px 18px;font-size:13px;font-weight:600;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer}
   .set-btn:hover{background:#1d4ed8}
   .chips{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -52,11 +46,9 @@
   .toolbar{display:flex;gap:6px;flex-wrap:wrap}
   .tb{display:flex;align-items:center;gap:5px;padding:6px 12px;font-size:13px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;color:#374151}
   .tb:hover{background:#f9fafb}
-  .sep{width:1px;height:28px;background:#e5e7eb;align-self:center}
+  .tsep{width:1px;height:28px;background:#e5e7eb;align-self:center}
   #crop-area{background:#111;border-radius:12px;overflow:hidden}
   #crop-img{display:block;max-width:100%;max-height:420px}
-
-  /* step 2 */
   #step2{display:none;flex-direction:column;gap:14px}
   .info-bar{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -82,17 +74,21 @@
   .file-size{font-size:10px;color:#9ca3af}
   .dl-btn{margin:6px 8px 8px;padding:9px;font-size:12px;font-weight:700;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;width:calc(100% - 16px);transition:background .15s}
   .dl-btn:hover{background:#1d4ed8}
-  .dl-btn:active{background:#1e40af;transform:scale(.98)}
-  .bottom-bar{display:flex;gap:8px;justify-content:flex-end}
+  .dl-btn:active{transform:scale(.98)}
+  .bottom-bar{display:flex;gap:10px;justify-content:flex-end;align-items:center}
+  .zip-btn{padding:10px 24px;font-size:14px;font-weight:700;border-radius:8px;border:none;background:#16a34a;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:background .15s}
+  .zip-btn:hover{background:#15803d}
+  .zip-btn:disabled{opacity:.5;cursor:not-allowed}
+  .progress-bar-wrap{background:#e5e7eb;border-radius:99px;height:6px;width:160px;overflow:hidden;display:none}
+  .progress-bar{height:100%;background:#16a34a;border-radius:99px;transition:width .2s;width:0%}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1><i class="ti ti-crop"></i> Image Crop &amp; Export Tool</h1>
+  <h1><i class="ti ti-scissors"></i> Image Crop &amp; Export Tool</h1>
 
-  <!-- Drop zone -->
   <div id="drop-zone" onclick="document.getElementById('fin').click()">
-    <i class="ti ti-photo-up"></i>
+    <i class="ti ti-upload"></i>
     <p>Drop an image or click to upload</p>
     <small>PNG · JPEG · WebP · GIF · AVIF</small>
     <input type="file" id="fin" accept="image/*" style="display:none">
@@ -104,7 +100,6 @@
       <span class="step-title">Step 1 — Set size &amp; crop</span>
       <button class="ghost-btn" id="new1"><i class="ti ti-refresh"></i> New image</button>
     </div>
-
     <div class="panel">
       <div class="panel-title">Ratio</div>
       <div class="ratio-btns">
@@ -120,7 +115,6 @@
         <button class="rb" data-w="21" data-h="9">21:9</button>
       </div>
     </div>
-
     <div class="panel">
       <div class="panel-title">1x output size — type → Set &amp; lock → position crop → Export</div>
       <div class="size-fields">
@@ -140,22 +134,19 @@
         <span id="size-note"></span>
       </div>
     </div>
-
     <div class="toolbar">
       <button class="tb" id="zin"><i class="ti ti-zoom-in"></i> Zoom in</button>
       <button class="tb" id="zout"><i class="ti ti-zoom-out"></i> Zoom out</button>
-      <div class="sep"></div>
+      <div class="tsep"></div>
       <button class="tb" id="rotl"><i class="ti ti-rotate-left"></i> Rotate L</button>
       <button class="tb" id="rotr"><i class="ti ti-rotate-right"></i> Rotate R</button>
       <button class="tb" id="flipx"><i class="ti ti-flip-horizontal"></i> Flip</button>
       <button class="tb" id="rst"><i class="ti ti-aspect-ratio"></i> Reset</button>
     </div>
-
     <div id="crop-area"><img id="crop-img" alt=""></div>
-
     <div class="row-apart" style="margin-top:4px">
       <span id="sel-dim" style="font-size:12px;color:#9ca3af"></span>
-      <button class="primary-btn" id="proceed-btn">Export →</button>
+      <button class="primary-btn" id="proceed-btn"><i class="ti ti-arrow-right"></i> Export</button>
     </div>
   </div>
 
@@ -175,12 +166,18 @@
     </div>
     <div class="cards-grid" id="cards"></div>
     <div class="bottom-bar">
-      <button class="primary-btn" id="export-all"><i class="ti ti-download"></i> Download all 8</button>
+      <div class="progress-bar-wrap" id="progress-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <button class="zip-btn" id="export-all">
+        <i class="ti ti-file-zip"></i> Download all 8 as ZIP
+      </button>
     </div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
   const dropZone = document.getElementById('drop-zone');
   const fin = document.getElementById('fin');
@@ -192,9 +189,10 @@
   const chInp = document.getElementById('ch');
   const szLockBtn = document.getElementById('sz-lock');
   const sizeNote = document.getElementById('size-note');
+  const progressWrap = document.getElementById('progress-wrap');
+  const progressBar = document.getElementById('progress-bar');
   let szLocked = true, cropper = null, out1x = { w: 0, h: 0 }, sourceCropCanvas = null;
 
-  // AVIF support check
   const avifSupported = (() => {
     const c = document.createElement('canvas');
     c.width = 1; c.height = 1;
@@ -250,7 +248,7 @@
     if (sz) sz.textContent = bytes > 1048576 ? (bytes / 1048576).toFixed(2) + ' MB' : (bytes / 1024).toFixed(0) + ' KB';
   }
 
-  // Direct download — works on any real hosted page
+  // Individual download
   function doDownload(vid) {
     const { dataUrl, v } = buildCanvas(vid);
     const fname = `${v.label.replace(' ', '-')}.${v.ext}`;
@@ -260,6 +258,52 @@
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  }
+
+  // Convert dataURL to base64 string for JSZip
+  function dataUrlToBase64(dataUrl) {
+    return dataUrl.split(',')[1];
+  }
+
+  // ZIP all 8 and download as single file
+  async function downloadAllAsZip() {
+    const btn = document.getElementById('export-all');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader"></i> Zipping…';
+    progressWrap.style.display = 'block';
+    progressBar.style.width = '0%';
+
+    const zip = new JSZip();
+    const folder = zip.folder('cropped-images');
+
+    variants.forEach((v, i) => {
+      const { dataUrl } = buildCanvas(v.id);
+      const fname = `${v.label.replace(' ', '-')}.${v.ext}`;
+      folder.file(fname, dataUrlToBase64(dataUrl), { base64: true });
+      progressBar.style.width = `${Math.round(((i + 1) / variants.length) * 70)}%`;
+    });
+
+    progressBar.style.width = '85%';
+    btn.innerHTML = '<i class="ti ti-loader"></i> Generating ZIP…';
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    progressBar.style.width = '100%';
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cropped-images.zip';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-file-zip"></i> Download all 8 as ZIP';
+      progressWrap.style.display = 'none';
+      progressBar.style.width = '0%';
+    }, 1000);
   }
 
   function resetApp() {
@@ -298,7 +342,6 @@
     };
   }
 
-  // Ratio buttons
   document.querySelectorAll('.rb').forEach(b => {
     b.addEventListener('click', () => {
       document.querySelectorAll('.rb').forEach(x => x.classList.remove('active'));
@@ -308,7 +351,6 @@
     });
   });
 
-  // Lock toggle
   szLockBtn.addEventListener('click', () => {
     szLocked = !szLocked;
     szLockBtn.classList.toggle('on', szLocked);
@@ -409,34 +451,13 @@
           renderCard(v.id);
         });
       }
-
       document.getElementById('dl-' + v.id).addEventListener('click', () => doDownload(v.id));
       renderCard(v.id);
     });
   }
 
-  // Bulk download — sequential with delay
-  document.getElementById('export-all').addEventListener('click', function () {
-    const btn = this;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="ti ti-loader"></i> Downloading…';
-    let i = 0;
-    function next() {
-      if (i >= variants.length) {
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="ti ti-download"></i> Download all 8';
-        }, 400);
-        return;
-      }
-      doDownload(variants[i].id);
-      i++;
-      setTimeout(next, 700);
-    }
-    next();
-  });
+  document.getElementById('export-all').addEventListener('click', downloadAllAsZip);
 
-  // File input
   fin.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
